@@ -18,31 +18,32 @@ class fitbit(object):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
 		body = json.loads(rawbody)
-		for i in range(len(body)):
-			latitude = float(body[i]['latitude'])
-			longitude = float(body[i]['longitude'])
-			timestamp = body[i]['timestamp']
-			db.insert_gps_data(cherrypy.session['user_id'], latitude, longitude, timestamp)
+		key = body[0]['key']
+		for i in range(len(body[1])):
+			latitude = float(body[1][i]['latitude'])
+			longitude = float(body[1][i]['longitude'])
+			timestamp = body[1][i]['timestamp']
+			print str(latitude) + str(longitude) + timestamp
+			db.insert_gps_data(key, latitude, longitude, timestamp)
 		return rawbody
 
 	@cherrypy.expose
-	def login(self, scopes, user_id, time_to_live, token):
-		#raise cherrypy.HTTPRedirect('https://www.fitbit.com/oauth2/authorize?response_type=token&client_id=227ZFL&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&scope=activity%20heartrate%20location%20nutrition%20profile%20settings%20sleep%20social%20weight&expires_in=604800')
-		# scope
-		# user id
-		# time to live
-		# token
-		# key - timestamp + user id
+	def login(self, access_token, expires_in, refresh_token, scope, token_type, user_id):
 		timestamp = int(time.time())
 		key = hmac.new(user_id+str(timestamp))
-		User.get_or_create(name=user_id)
-		User.update(scope=scope, ttl=int(time_to_live), token=token, key=key).where(name=user_id)
+		User.get_or_create(user_id=user_id)
+		User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(user_id=user_id)
 		return key
 
 	@cherrypy.expose
 	def callback(self, code):
 		#return 'MjI3WkZMOmQyZDI3NjBmZWZiOTU0ZGVjZTZhNDI3OTk1OTRiYjYw'
 		return code
+
+	@cherrypy.expose
+	def show(self):
+		return 'hi'
+		
 
 if __name__ == '__main__':
 

@@ -61,7 +61,7 @@ def retrieve_user_id(key='null', access_token='null'):
 	if key != 'null':
 		for user in User.select().where(key==key):
 			user_id = user.user_id
-	else if access_token != 'null':
+	elif access_token != 'null':
 		for user in User.select().where(access_token==access_token):
 			user_id = user.user_id
 	return user_id

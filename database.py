@@ -107,7 +107,19 @@ def select_gps_fitbit(user_id=None, key=None, start_timestamp, end_timestamp):
 def select_user(user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
-			return {'success':False}
+			result = list()
+			for user in User.select():
+				temp = dict()
+				temp['user_id'] = user.user_id
+				temp['access_token'] = user.access_token
+				temp['expires_in'] = user.expires_in
+				temp['refresh_token'] = user.refresh_token
+				temp['scope'] = user.scope
+				temp['token_type'] = user.token_type
+				temp['key'] = user.key
+				result.append(temp)
+			return result
+
 		# select by user_id
 		result = dict()
 		if user_id is not None:

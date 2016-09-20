@@ -9,9 +9,6 @@ import hmac
 import urllib2
 import urllib
 
-CLIENT_ID = '227ZFL'
-CLIENT_SECRET = '2fc5d3d02f9fc9e5642fb4abc322a7e2'
-
 class fitbit(object):
 	@cherrypy.expose
 	def gps(self):
@@ -44,9 +41,7 @@ class fitbit(object):
 	def show(self):
 		return 'hi'
 
-
 if __name__ == '__main__':
-
 	cherrypy.config.update({'server.socket_host':'0.0.0.0',
 		'server.socket_port':8080,
 		})

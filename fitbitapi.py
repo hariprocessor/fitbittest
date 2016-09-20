@@ -1,10 +1,8 @@
 import fitbit
-
-CLIENT_ID = '227ZFL'
-CLIENT_SECRET = '2fc5d3d02f9fc9e5642fb4abc322a7e2'
+import variables as v
 
 def user_login(access_token, refresh_token):
-	user = fitbit.Fitbit(CLIENT_ID, CLIENT_SECRET, access_token=access_token, refresh_token=refresh_token)
+	user = fitbit.Fitbit(v.CLIENT_ID, v.CLIENT_SECRET, access_token=access_token, refresh_token=refresh_token)
 
 def step(access_token, refresh_token):
 	user_login(access_token, refresh_token)

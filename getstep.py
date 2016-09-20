@@ -1,9 +1,7 @@
 import database
 import fitbit
 import time
-
-CLIENT_ID = '227ZFL'
-CLIENT_SECRET = '2fc5d3d02f9fc9e5642fb4abc322a7e2'
+import variables as v
 
 def get_yesterday():
 	today = date.today()
@@ -11,7 +9,7 @@ def get_yesterday():
 	return yesterday.strftime("%Y-%m-%d")
 
 def user_login(access_token, refresh_token):
-	user = fitbit.Fitbit(CLIENT_ID, CLIENT_SECRET, access_token=access_token, refresh_token=refresh_token)
+	user = fitbit.Fitbit(v.CLIENT_ID, v.CLIENT_SECRET, access_token=access_token, refresh_token=refresh_token)
 	return user
 
 def step(access_token, refresh_token):
@@ -21,7 +19,7 @@ def step(access_token, refresh_token):
 		steps = str(mindata['value'])
 		time = str(mindata['time'])
 		mintime = time.split(':')[0]
-		
+
 
 for user in database.user_list():
 	user_login(user.)

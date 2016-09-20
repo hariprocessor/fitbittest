@@ -1,8 +1,9 @@
 import cherrypy
 from peewee import *
 import datetime
+import variables as v
 
-db = MySQLDatabase('fitbit',host='127.0.0.1',port=3306, user='root', passwd='apmsetup')
+db = MySQLDatabase(v.DATABASE,host=v.HOST,port=3306, user=v.USER, passwd=v.PASSWD)
 
 class GPS(Model):
 	user_id = TextField()

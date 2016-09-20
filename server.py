@@ -1,7 +1,7 @@
 import cherrypy
 import simplejson as json
 import time
-import database as db
+import database
 import datetime
 import string
 import random
@@ -12,30 +12,33 @@ import urllib
 class fitbit(object):
 	@cherrypy.expose
 	def gps(self):
-		cl = cherrypy.request.headers['Content-Length']
-		rawbody = cherrypy.request.body.read(int(cl))
-		body = json.loads(rawbody)
-		key = body[0]['key']
-		for i in range(len(body[1])):
-			latitude = float(body[1][i]['latitude'])
-			longitude = float(body[1][i]['longitude'])
-			timestamp = body[1][i]['timestamp']
-			print str(latitude) + str(longitude) + timestamp
-			db.insert_gps_data(key, latitude, longitude, timestamp)
-		return rawbody
+		try:
+			cl = cherrypy.request.headers['Content-Length']
+			rawbody = cherrypy.request.body.read(int(cl))
+			body = json.loads(rawbody)
+			key = body[0]['key']
+			for i in range(len(body[1])):
+				latitude = float(body[1][i]['latitude'])
+				longitude = float(body[1][i]['longitude'])
+				timestamp = body[1][i]['timestamp']
+				db.insert_gps(key=key, latitude, longitude, timestamp)
+			return json.dumps({'success':'true'})
+		except Exception, e:
+			return json.dumps({'success':'false'})
 
 	@cherrypy.expose
 	def login(self, access_token, expires_in, refresh_token, scope, token_type, user_id):
 		timestamp = int(time.time())
-		key = hmac.new(user_id+str(timestamp))
-		User.get_or_create(user_id=user_id)
-		User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(user_id=user_id)
-		return key
+		key = hmac.new(user_id+str(timestamp)).hexdigest()
+		result = database.insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key)
+		if result['success'] is True:
+			return json.dumps({'success':'true', 'key':key})
+		else
+			return json.dumps({'success':'false'})
 
 	@cherrypy.expose
 	def callback(self, code):
-		#return 'MjI3WkZMOmQyZDI3NjBmZWZiOTU0ZGVjZTZhNDI3OTk1OTRiYjYw'
-		return code
+		return json.dumps({'success':'true', 'code':code})
 
 	@cherrypy.expose
 	def show(self):

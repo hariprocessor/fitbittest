@@ -40,10 +40,6 @@ class fitbit(object):
 	def callback(self, code):
 		return json.dumps({'success':'true', 'code':code})
 
-	@cherrypy.expose
-	def show(self):
-		return 'hi'
-
 if __name__ == '__main__':
 	cherrypy.config.update({'server.socket_host':'0.0.0.0',
 		'server.socket_port':8080,

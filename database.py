@@ -46,36 +46,89 @@ db.create_table(User, safe=True)
 db.create_table(Fitbit, safe=True)
 #GPS.get_create_table(fail_silently=True)
 
-def insert_gps_data(user_id, latitude, longitude, timestamp):
-	timestamp_ = datetime.datetime.fromtimestamp(int(timestamp))
-	gps = GPS(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp_)
-	gps.save()
+def insert_gps(user_id=None, key=None, latitude, longitude, timestamp):
+	try:
+		if user_id is None and key is None:
+			return {'success':False}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		gps = GPS(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp)
+		gps.save()
+		return {'success':True}
+	except Exception, e:
+		return {'success':False, 'error_type':e}
 
-def user_list():
-	users = list()
-	for user in User.select():
-		users.append(dict(access_token=user.access_token, user_id=user.user_id))
-	return users
+def insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key):
+	try:
+		# insert new user
+		if select_user(user_id=user_id).get('key') is None:
+			user = User(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, user_id=user_id, key=key)
+			user.save()
+		# update user
+		else:
+			User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(user_id=user_id)
+		return {'success':True}
+	except Exception, e:
+		return {'success':False, 'error_type':e}
 
-def retrieve_user_id(key='null', access_token='null'):
-	user_id = 'null'
-	if key != 'null':
-		for user in User.select().where(key==key):
-			user_id = user.user_id
-	elif access_token != 'null':
-		for user in User.select().where(access_token==access_token):
-			user_id = user.user_id
-	return user_id
+def insert_fitbit(user_id=None, key=None, timestamp, step):
+	try:
+		if user_id is None and key is None:
+			return {'success':False}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		fitbit = Fitbit(user_id=user_id, timestamp=timestamp, step=step)
+		fitbit.save()
+		return {'success':True}
+	except Exception, e:
+		return {'success':False, 'error_type':e}
 
+def select_gps_fitbit(user_id=None, key=None, start_timestamp, end_timestamp):
+	try:
+		if user_id is None and key is None:
+			return {'success':False}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		result = dict()
+		result['user_id'] = user_id
+		result['data'] = list()
+		for data in GPS.select().join(Fitbit).where(Fitbit.user_id==GPS.user_id, Fitbit.timestamp==GPS.timestamp):
+			temp = dict()
+			temp['timestamp'] = data.timestamp
+			temp['latitude'] = data.latitude
+			temp['longitude'] = data.longitude
+			temp['step'] = data.step
+			result['data'].append(temp)
+		result['success'] = True
+		return result
+	except Exception, e:
+		return {'success':False, 'error_type':e}
 
-def retrieve_token(key):
-	# select token from user where key=something
-	key = list()
-	for user in User.select().where(User.key==key):
-		key=[user.access_token, user.refresh_token]
-	return key
-
-def insert_step_data(user_id, timestamp, step):
-	timestamp_ = datetime.datetime.fromtimestamp(int(timestamp))
-	fitbit = Fitbit(user_id=user_id, timestamp=timestamp_, step=step)
-	fitbit.save()
+def select_user(user_id=None, key=None):
+	try:
+		if user_id is None and key is None:
+			return {'success':False}
+		# select by user_id
+		result = dict()
+		if user_id is not None:
+			for user in User.select().where(user_id==user_id):
+				result['user_id'] = user.user_id
+				result['access_token'] = user.access_token
+				result['expires_in'] = user.expires_in
+				result['refresh_token'] = user.refresh_token
+				result['scope'] = user.scope
+				result['token_type'] = user.token_type
+				result['key'] = user.key
+		else:
+			for user in User.select().where(key==key):
+				result['user_id'] = user.user_id
+				result['access_token'] = user.access_token
+				result['expires_in'] = user.expires_in
+				result['refresh_token'] = user.refresh_token
+				result['scope'] = user.scope
+				result['token_type'] = user.token_type
+				result['key'] = user.key
+		result['success'] = True
+		return result
+	except Exception, e:
+		return {'success':False, 'error_type':e}

@@ -46,7 +46,7 @@ db.create_table(User, safe=True)
 db.create_table(Fitbit, safe=True)
 #GPS.get_create_table(fail_silently=True)
 
-def insert_gps(user_id=None, key=None, latitude, longitude, timestamp):
+def insert_gps(latitude, longitude, timestamp, user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
 			return {'success':False}
@@ -71,7 +71,7 @@ def insert_user(access_token, expires_in, refresh_token, scope, token_type, user
 	except Exception, e:
 		return {'success':False, 'error_type':e}
 
-def insert_fitbit(user_id=None, key=None, timestamp, step):
+def insert_fitbit(timestamp, step, user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
 			return {'success':False}
@@ -83,7 +83,7 @@ def insert_fitbit(user_id=None, key=None, timestamp, step):
 	except Exception, e:
 		return {'success':False, 'error_type':e}
 
-def select_gps_fitbit(user_id=None, key=None, start_timestamp, end_timestamp):
+def select_gps_fitbit(start_timestamp, end_timestamp, user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
 			return {'success':False}

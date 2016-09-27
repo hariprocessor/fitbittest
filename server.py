@@ -11,6 +11,9 @@ import urllib
 
 class fitbit(object):
 	@cherrypy.expose
+	def index(self):
+		return "HELLO WORLD!<br>CONTACT : hariprocessor at gmail dot com"
+	@cherrypy.expose
 	def gps(self):
 		try:
 			cl = cherrypy.request.headers['Content-Length']
@@ -21,7 +24,7 @@ class fitbit(object):
 				latitude = float(body[1][i]['latitude'])
 				longitude = float(body[1][i]['longitude'])
 				timestamp = body[1][i]['timestamp']
-				db.insert_gps(key=key, latitude, longitude, timestamp)
+				db.insert_gps(key=key, latitude=latitude, longitude=longitude, timestamp=timestamp)
 			return json.dumps({'success':'true'})
 		except Exception, e:
 			return json.dumps({'success':'false'})
@@ -33,7 +36,7 @@ class fitbit(object):
 		result = database.insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key)
 		if result['success'] is True:
 			return json.dumps({'success':'true', 'key':key})
-		else
+		else:
 			return json.dumps({'success':'false'})
 
 	@cherrypy.expose

@@ -1,7 +1,7 @@
 import cherrypy
 import simplejson as json
 import time
-import database
+import database as db
 import datetime
 import string
 import random
@@ -19,21 +19,25 @@ class fitbit(object):
 			cl = cherrypy.request.headers['Content-Length']
 			rawbody = cherrypy.request.body.read(int(cl))
 			body = json.loads(rawbody)
-			key = body[0]['key']
-			for i in range(len(body[1])):
-				latitude = float(body[1][i]['latitude'])
-				longitude = float(body[1][i]['longitude'])
-				timestamp = body[1][i]['timestamp']
-				db.insert_gps(key=key, latitude=latitude, longitude=longitude, timestamp=timestamp)
+			key = body['key']
+			for i in range(len(body['data'])):
+				latitude = float(body['data'][i]['latitude'])
+				longitude = float(body['data'][i]['longitude'])
+				timestamp = float(body['data'][i]['timestamp'])
+				success = db.insert_gps(key=key, latitude=latitude, longitude=longitude, timestamp=timestamp)
+				if not success['success']:
+					print success['error_type']
+					return json.dumps({'success':'false'})
 			return json.dumps({'success':'true'})
 		except Exception, e:
+			print e
 			return json.dumps({'success':'false'})
 
 	@cherrypy.expose
 	def login(self, access_token, expires_in, refresh_token, scope, token_type, user_id):
 		timestamp = int(time.time())
-		key = hmac.new(user_id+str(timestamp)).hexdigest()
-		result = database.insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key)
+		key = hmac.new(str(user_id)+str(timestamp)).hexdigest()
+		result = db.insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key)
 		if result['success'] is True:
 			return json.dumps({'success':'true', 'key':key})
 		else:

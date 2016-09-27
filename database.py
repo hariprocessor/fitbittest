@@ -33,27 +33,26 @@ class Fitbit(Model):
 
 
 db.connect()
-#db.drop_table(GPS)
-if GPS.table_exists():
-	db.drop_table(GPS)
-if User.table_exists():
-	db.drop_table(User)
-if Fitbit.table_exists():
-	db.drop_table(Fitbit)
+# if GPS.table_exists():
+	# db.drop_table(GPS)
+# if User.table_exists():
+	# db.drop_table(User)
+# if Fitbit.table_exists():
+	# db.drop_table(Fitbit)
 
-db.create_table(GPS, safe=True)
-db.create_table(User, safe=True)
-db.create_table(Fitbit, safe=True)
-#GPS.get_create_table(fail_silently=True)
+# db.create_table(GPS, safe=True)
+# db.create_table(User, safe=True)
+# db.create_table(Fitbit, safe=True)
 
 def insert_gps(latitude, longitude, timestamp, user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
-			return {'success':False}
+			return {'success':False, 'error_type':'no key or user_id'}
 		if key is not None:
 			user_id = select_user(key=key)['user_id']
-		gps = GPS(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp)
-		gps.save()
+		if select_user(user_id=user_id)['count'] != 1:
+			return {'success':False, 'error_type':'no user'}
+		GPS.insert(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp).execute()
 		return {'success':True}
 	except Exception, e:
 		return {'success':False, 'error_type':e}
@@ -61,13 +60,17 @@ def insert_gps(latitude, longitude, timestamp, user_id=None, key=None):
 def insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key):
 	try:
 		# insert new user
-		if select_user(user_id=user_id).get('key') is None:
-			user = User(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, user_id=user_id, key=key)
-			user.save()
+		query = select_user(user_id=user_id)
+		print 'query'
+		print query
+		if query['count']==0:
+			User.insert(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, user_id=user_id, key=key).execute()
+			return {'success':True}
 		# update user
-		else:
-			User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(user_id=user_id)
-		return {'success':True}
+		elif query['count']==1:
+			User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(User.user_id==user_id).execute()
+			return {'success':True}
+		return {'success':False, 'error_type':None}
 	except Exception, e:
 		return {'success':False, 'error_type':e}
 
@@ -108,6 +111,7 @@ def select_user(user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
 			result = list()
+			query = User.select()
 			for user in User.select():
 				temp = dict()
 				temp['user_id'] = user.user_id
@@ -119,28 +123,22 @@ def select_user(user_id=None, key=None):
 				temp['key'] = user.key
 				result.append(temp)
 			return result
-
 		# select by user_id
 		result = dict()
-		if user_id is not None:
-			for user in User.select().where(user_id==user_id):
-				result['user_id'] = user.user_id
-				result['access_token'] = user.access_token
-				result['expires_in'] = user.expires_in
-				result['refresh_token'] = user.refresh_token
-				result['scope'] = user.scope
-				result['token_type'] = user.token_type
-				result['key'] = user.key
-		else:
-			for user in User.select().where(key==key):
-				result['user_id'] = user.user_id
-				result['access_token'] = user.access_token
-				result['expires_in'] = user.expires_in
-				result['refresh_token'] = user.refresh_token
-				result['scope'] = user.scope
-				result['token_type'] = user.token_type
-				result['key'] = user.key
+		if user_id is not None:#using user_id
+			query = User.select().where(User.user_id==user_id)
+		else:#using key
+			query = User.select().where(User.key==key)
+		result['count'] = len(query)
+		for user in query:
+			result['user_id'] = user.user_id
+			result['access_token'] = user.access_token
+			result['expires_in'] = user.expires_in
+			result['refresh_token'] = user.refresh_token
+			result['scope'] = user.scope
+			result['token_type'] = user.token_type
+			result['key'] = user.key
 		result['success'] = True
 		return result
 	except Exception, e:
-		return {'success':False, 'error_type':e}
+		return {'success':False, 'error_type':str(e), 'count':-1}

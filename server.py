@@ -65,6 +65,10 @@ class fitbit(object):
 		select_user = db.select_user(key=key)
 		if not select_user['success']:
 			return json.dumps({'success':'false', 'error_type':select_user['error_type']})
+		delete_user_info = db.delete_user_info(key=key)
+		if not delete_user_info['success']:
+			return json.dumps({'success':'false', 'error_type':delete_user_info['error_type']})
+		return json.dumps({'success':'true'})
 
 
 

@@ -42,7 +42,12 @@ import database as db
 #     print result['error_type']
 #     print 'insert_gps error(using key)'
 
-result = db.select_gps_fitbit('1474815600', '1474815720', user_id='4WPSBP')
+#result = db.select_gps_fitbit('1474815600', '1474815720', user_id='4WPSBP')
+
+# result = db.delete_user_info(user_id='4WPSBP')
+# print result
+# result = db.delete_user_info(key='3ebb48b427c0b56aed9d9b142de7debf')
+# print result
 
 # import step
 # print step.get_yesterday()

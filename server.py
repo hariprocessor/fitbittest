@@ -60,6 +60,14 @@ class fitbit(object):
 			result['exists'] = 'false'
 		return json.dumps(result)
 
+	@cherrypy.expose
+	def logout(self, key):
+		select_user = db.select_user(key=key)
+		if not select_user['success']:
+			return json.dumps({'success':'false', 'error':select_user['error_type']})
+
+
+
 if __name__ == '__main__':
 	cherrypy.config.update({'server.socket_host':'0.0.0.0',
 		'server.socket_port':8080,

@@ -142,3 +142,16 @@ def select_user(user_id=None, key=None):
 		return result
 	except Exception, e:
 		return {'success':False, 'error_type':str(e), 'count':-1}
+
+def delete_user_info(user_id=None, key=None):
+	try:
+		assert user_id is not None or key is not None
+		# delete by user_id
+		result = {'success':True}
+		if key is None:# user_id
+			User.update(access_token=None, expires_in=None, refresh_token=None, scope=None, token_type=None, key=None).where(User.user_id==user_id).execute()
+		else:
+			User.update(access_token=None, expires_in=None, refresh_token=None, scope=None, token_type=None, key=None).where(User.key==key).execute()
+		return result
+	except Exception, e:
+		return {'success':False, 'error_type':str(e), 'count':-1}

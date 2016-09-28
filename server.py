@@ -8,6 +8,7 @@ import random
 import hmac
 import urllib2
 import urllib
+import authorization as auth
 
 class fitbit(object):
 	@cherrypy.expose
@@ -45,7 +46,19 @@ class fitbit(object):
 
 	@cherrypy.expose
 	def callback(self, code):
-		return json.dumps({'success':'true', 'code':code})
+		response = auth.get_token(code)
+		if not response['success']:
+			return json.dumps({'success':'false'})
+		key = auth.make_key(response['user_id'])
+		insert_user = db.insert_user(response['access_token'], response['expires_in'], response['refresh_token'], response['scope'], response['token_type'], response['user_id'], key)
+		if insert_user['success']:
+			exists = insert_user['exists']
+		result = {'success':'true', 'key':key}
+		if exists:
+			result['exists'] = 'true'
+		else:
+			result['exists'] = 'false'
+		return json.dumps(result)
 
 if __name__ == '__main__':
 	cherrypy.config.update({'server.socket_host':'0.0.0.0',

@@ -65,11 +65,11 @@ def insert_user(access_token, expires_in, refresh_token, scope, token_type, user
 		print query
 		if query['count']==0:
 			User.insert(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, user_id=user_id, key=key).execute()
-			return {'success':True}
+			return {'success':True, 'exists':False}
 		# update user
 		elif query['count']==1:
 			User.update(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token, scope=scope, token_type=token_type, key=key).where(User.user_id==user_id).execute()
-			return {'success':True}
+			return {'success':True, 'exists':True}
 		return {'success':False, 'error_type':None}
 	except Exception, e:
 		return {'success':False, 'error_type':e}

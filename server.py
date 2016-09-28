@@ -64,7 +64,7 @@ class fitbit(object):
 	def logout(self, key):
 		select_user = db.select_user(key=key)
 		if not select_user['success']:
-			return json.dumps({'success':'false', 'error':select_user['error_type']})
+			return json.dumps({'success':'false', 'error_type':select_user['error_type']})
 
 
 

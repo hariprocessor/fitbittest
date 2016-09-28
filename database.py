@@ -154,4 +154,4 @@ def delete_user_info(user_id=None, key=None):
 			User.update(access_token=None, expires_in=None, refresh_token=None, scope=None, token_type=None, key=None).where(User.key==key).execute()
 		return result
 	except Exception, e:
-		return {'success':False, 'error_type':str(e), 'count':-1}
+		return {'success':False, 'error_type':str(e)}

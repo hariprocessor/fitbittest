@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import database as db
 import datetime
 import time
+import sys
+
 def get_yesterday_timestamp():
     yesterday = datetime.date.fromtimestamp(time.time() - 60*60*24)
     return time.mktime(yesterday.timetuple())
@@ -9,7 +11,10 @@ def get_yesterday_timestamp():
 def get_timestamp(day):
     return time.mktime(datetime.datetime.strptime(day, "%Y-%m-%d").timetuple())
 
-day = '2016-09-22'
+assert len(sys.argv) == 2, 'Usage : python step.py [YYYY-mm-dd]'
+assert get_today_timestamp() > date_to_timestamp(sys.argv[1]), 'Input previous day'
+
+day = sys.argv[1]
 
 for user in db.select_user():#time='2016-09-09' format or yesterday
     user_id = user['user_id']

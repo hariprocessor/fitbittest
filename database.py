@@ -95,11 +95,11 @@ def select_gps_fitbit(start_timestamp, end_timestamp, user_id=None, key=None):
 		result = dict()
 		result['user_id'] = user_id
 		result['data'] = list()
-		for data in GPS.select().join(Fitbit).where(Fitbit.user_id==GPS.user_id, Fitbit.timestamp==GPS.timestamp):
+		for data in Fitbit.select(Fitbit, GPS).join(GPS, JOIN.LEFT_OUTER, on = ((Fitbit.user_id==GPS.user_id)&(Fitbit.timestamp==GPS.timestamp))):
 			temp = dict()
 			temp['timestamp'] = data.timestamp
-			temp['latitude'] = data.latitude
-			temp['longitude'] = data.longitude
+			temp['latitude'] = data.gps.latitude
+			temp['longitude'] = data.gps.longitude
 			temp['step'] = data.step
 			result['data'].append(temp)
 		result['success'] = True

@@ -92,7 +92,7 @@ def insert_gps(latitude, longitude, timestamp, user_id=None, key=None):
 			user_id = select_user(key=key)['user_id']
 		#if select_user(user_id=user_id)['count'] != 1:
 		#	return {'success':False, 'error_type':'no user'}
-		GPS.get_or_create(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp).execute()
+		GPS.get_or_create(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp)#.execute()
 		return {'success':True}
 	except Exception, e:
 		return {'success':False, 'error_type':e}

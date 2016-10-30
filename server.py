@@ -27,6 +27,7 @@ class fitbit(object):
 				longitude = float(body['data'][i]['longitude'])
 				timestamp = float(body['data'][i]['timestamp'])
 				success = db.insert_gps(key=key, latitude=latitude, longitude=longitude, timestamp=timestamp)
+				print success
 				if not success['success']:
 					print success['error_type']
 					return json.dumps({'success':'false'})

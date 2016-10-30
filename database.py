@@ -30,6 +30,22 @@ class Fitbit(Model):
 	step = IntegerField()
 	class Meta:
 		database = db
+class WiFi(Model):
+    user_id = TextField()
+    bssid = TextField()
+    ssid = TextField()
+    level = IntegerField()
+    timestamp = TimestampField()
+    class Meta:
+        database = db
+
+class Step(Model):
+    user_id = TextField()
+    step_count = IntegerField()
+    timestamp = TimestampField()
+    class Meta:
+        database = db
+
 
 
 db.connect()
@@ -44,15 +60,39 @@ db.connect()
 # db.create_table(User, safe=True)
 # db.create_table(Fitbit, safe=True)
 
+def insert_step(step_count, timestamp, user_id=None, key=None):
+	try:
+		if user_id is None and key is None:
+			return {'success':False, 'error_type':'no key or user_id'}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		Step.get_or_create(user_id=user_id, step_count=step_count, timestamp=timestamp).execute()
+		return {'success':True}
+	except Exception, e:
+		return {'success':False, 'error_type':e}
+
+def insert_wifi(bssid, ssid, level, timestamp, user_id=None, key=None):
+	try:
+		if user_id is None and key is None:
+			return {'success':False, 'error_type':'no key or user_id'}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		WiFi.get_or_create(user_id=user_id, bssid=bssid, ssid=ssid, level=level, timestamp=timestamp).execute()
+		return {'success':True}
+	except Exception, e:
+		return {'success':False, 'error_type':'insert_wifi'}
+
+
+
 def insert_gps(latitude, longitude, timestamp, user_id=None, key=None):
 	try:
 		if user_id is None and key is None:
 			return {'success':False, 'error_type':'no key or user_id'}
 		if key is not None:
 			user_id = select_user(key=key)['user_id']
-		if select_user(user_id=user_id)['count'] != 1:
-			return {'success':False, 'error_type':'no user'}
-		GPS.insert(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp).execute()
+		#if select_user(user_id=user_id)['count'] != 1:
+		#	return {'success':False, 'error_type':'no user'}
+		GPS.get_or_create(user_id=user_id, latitude=latitude, longitude=longitude, timestamp=timestamp).execute()
 		return {'success':True}
 	except Exception, e:
 		return {'success':False, 'error_type':e}
@@ -85,6 +125,27 @@ def insert_fitbit(timestamp, step, user_id=None, key=None):
 		return {'success':True}
 	except Exception, e:
 		return {'success':False, 'error_type':e}
+
+def select_gps_list(start_timestamp, end_timestamp, user_id=None, key=None):
+	try:
+		if user_id is None and key is None:
+			return {'success':False}
+		if key is not None:
+			user_id = select_user(key=key)['user_id']
+		result = dict()
+		result['user_id'] = user_id
+		result['data'] = list()
+		for data in GPS.select().where(GPS.user_id==user_id):
+			temp = dict()
+			temp['timestamp'] = data.timestamp
+			temp['latitude'] = data.latitude
+			temp['longitude'] = data.longitude
+			result['data'].append(temp)
+
+		return result
+	except Exception, e:
+		return {'success':False, 'error_type':e}
+
 
 def select_gps_fitbit(start_timestamp, end_timestamp, user_id=None, key=None):
 	try:

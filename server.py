@@ -9,6 +9,7 @@ import hmac
 import urllib2
 import urllib
 import authorization as auth
+from mako.template import Template
 
 class fitbit(object):
 	@cherrypy.expose
@@ -46,6 +47,7 @@ class fitbit(object):
 
 	@cherrypy.expose
 	def callback(self, code):
+		print 'callback'+'*****************************'
 		response = auth.get_token(code)
 		if not response['success']:
 			return json.dumps({'success':'false'})
@@ -70,7 +72,69 @@ class fitbit(object):
 			return json.dumps({'success':'false', 'error_type':delete_user_info['error_type']})
 		return json.dumps({'success':'true'})
 
+	@cherrypy.expose
+	def gpstest(self):
+		cl = cherrypy.request.headers['Content-Length']
+		rawbody = cherrypy.request.body.read(int(cl))
 
+		print "******************"
+		body = json.loads(rawbody)
+		if 'wifi' in body:
+			print "******************"
+			print "wifi"
+			for data in body['wifi']:
+				bssid = data['bssid']
+				ssid = data['ssid']
+				level = data['level']
+				timestamp = float(data['timestamp'])
+				db.insert_wifi(user_id='1', bssid=bssid, ssid=ssid, level=level, timestamp=timestamp)
+		if 'gps' in body:
+			print "******************"
+			print 'GPS'
+			for data in body['gps']:
+				latitude = float(data['latitude'])
+				longitude = float(data['longitude'])
+				timestamp = float(data['timestamp'])
+				db.insert_gps(user_id='1', latitude=latitude, longitude=longitude, timestamp=timestamp)
+		if 'step' in body:
+			print "******************"
+			print "step"
+			for data in body['step']:
+				step = int(data['step'])
+				timestamp = float(data['timestamp'])
+				db.insert_step(user_id='1', step_count=step, timestamp=timestamp)
+
+	@cherrypy.expose
+	def gpsresult(self):
+		gps_html = """
+			<table>
+				<tr>
+					<th>timestamp</th>
+					<th>latitude</th>
+					<th>longitude</th>
+				</tr>
+				for i in range()
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+
+			</table>
+		"""
+
+	@cherrypy.expose
+	def wifiresult(self):
+		wifi_html = """
+			<table>
+				<tr>
+
+				</tr>
+			</table>
+		"""
+
+def timestampConvert(timestamp):
+	return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
 
 if __name__ == '__main__':
 	cherrypy.config.update({'server.socket_host':'0.0.0.0',

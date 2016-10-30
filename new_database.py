@@ -13,6 +13,22 @@ class GPS(Model):
     class Meta:
         database = db
 
+class WiFi(Model):
+    user_id = TextField()
+    bssid = TextField()
+    ssid = TextField()
+    level = IntegerField()
+    timestamp = TimestampField()
+    class Meta:
+        database = db
+
+class Step(Model):
+    user_id = TextField()
+    step_count = IntegerField()
+    timestamp = TimestampField()
+    class Meta:
+        database = db
+
 class User(Model):
     access_token = TextField()
     expires_in = IntegerField()
@@ -32,6 +48,7 @@ class Fitbit(Model):
         database = db
 
 
+
 db.connect()
 if GPS.table_exists():
     db.drop_table(GPS)
@@ -39,7 +56,13 @@ if User.table_exists():
     db.drop_table(User)
 if Fitbit.table_exists():
     db.drop_table(Fitbit)
+if WiFi.table_exists():
+    db.drop_table(WiFi)
+if Step.table_exists():
+    db.drop_table(Step)
 
 db.create_table(GPS, safe=True)
 db.create_table(User, safe=True)
 db.create_table(Fitbit, safe=True)
+db.create_table(WiFi, safe=True)
+db.create_table(Step, safe=True)

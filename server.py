@@ -36,16 +36,6 @@ class fitbit(object):
 			print e
 			return json.dumps({'success':'false'})
 
-	# @cherrypy.expose
-	# def login(self, access_token, expires_in, refresh_token, scope, token_type, user_id):
-	# 	timestamp = int(time.time())
-	# 	key = hmac.new(str(user_id)+str(timestamp)).hexdigest()
-	# 	result = db.insert_user(access_token, expires_in, refresh_token, scope, token_type, user_id, key)
-	# 	if result['success'] is True:
-	# 		return json.dumps({'success':'true', 'key':key})
-	# 	else:
-	# 		return json.dumps({'success':'false'})
-
 	@cherrypy.expose
 	def callback(self, code):
 		print 'callback'+'*****************************'
